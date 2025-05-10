@@ -94,6 +94,10 @@ docker exec -it ollama-ai ollama list
 
 <p>Coming Soon 😔</p>
 
+## Access Application
+
+<p>Once Ollama, Open Web UI is up and running properly, by default you can access the Open Web UI web portal at http://127.0.0.1:3000.</p>
+
 ## Contributing
 
 <p>You can contribute to this project through Pull Requests to this Repository, or you can report bugs or vulnerabilities through the issues feature on github. 🐳</p>
