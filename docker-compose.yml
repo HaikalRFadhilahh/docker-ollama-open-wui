@@ -1,4 +1,4 @@
-version: "3.9"
+# version: "3.9"
 
 # Docker Compose List Services Configuration
 services:
@@ -14,7 +14,7 @@ services:
         ipv4_address: "10.11.12.26"
   # Open Web UI (Ollama Web Interface like ChatGPT) Configuration
   ollama-open-web-ui:
-    image: ghcr.io/open-webui/open-webui:main
+    image: ghcr.io/haikalrfadhilahh/open-web-ui:1.0
     container_name: ollama-open-web-ui
     volumes:
       - open-web-ui:/app/backend/data:rw
