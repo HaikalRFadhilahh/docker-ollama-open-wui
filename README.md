@@ -96,7 +96,43 @@ docker exec -it ollama-ai ollama list
 
 ## Access Application
 
-<p>Once Ollama, Open Web UI is up and running properly, by default you can access the Open Web UI web portal at http://127.0.0.1:3000.</p>
+<p>After Ollama and Open Web UI is up and running properly, by default you can access the Open Web UI web portal at http://127.0.0.1:3000.</p>
+
+<p>But you can change the Host and Port Open Web UI using operating system env. </p>
+
+### Linux / Mac Os
+
+<p>You can change the Host and Port via Export Variable ENV in the terminal with the command below:</p>
+
+```bash
+export OPEN_WEB_UI_HOST=${Your preferred host}
+```
+
+```bash
+export OPEN_WEB_UI_PORT=${Your preferred port}
+```
+
+### Windows
+
+<p>You can change the Host and Port via command promt Variable ENV in the terminal with the command below:</p>
+
+```sh
+set OPEN_WEB_UI_HOST=${Your preferred host}
+```
+
+```sh
+set OPEN_WEB_UI_PORT=${Your preferred port}
+```
+
+### After Setting Custom Host and Port
+
+<p>After configuring your Host and Port through Operating System Variables, you are required to restart when docker compose is running with the command below: </p>
+
+```bash
+docker compose down && docker compose up -d
+```
+
+<p>After restarting, you can access the Open Web UI through the Host and Port that you have configured.</p>
 
 ## Contributing
 
