@@ -19,7 +19,8 @@ script_menu() {
     echo "3. Stopping Docker Compose Services"
     echo "4. Installing Ollama Models"
     echo "5. Remove / Uninstall Ollama Models"
-    echo "6. Exit"
+    echo "6. Change Port Docker Compose Service (Open Web UI)"
+    echo "7. Exit"
     echo -n "Enter your preferred option number: "
     read ops
     case $ops in
@@ -39,6 +40,9 @@ script_menu() {
         docker_utilities 5
         ;;
     6)
+        docker_utilities 6
+        ;;
+    7)
         print_text green "\n Thanks For Using Haikal's Deployment Script 🐳! \n"
         exit 0
         ;;
@@ -69,6 +73,9 @@ docker_utilities() {
     5)
         remove_ollama_models
         ;;
+    6)
+        custom_network_docker_compose_service
+        ;;
     esac
     else
         clear_screen
@@ -79,9 +86,40 @@ docker_utilities() {
 # Starting Docker Compose File
 start_docker_compose() {
     if [[ -f "docker-compose.yml" ]];then
-        docker compose up -d
-        clear_screen
-        print_text green "Ollama and Open Web UI Starting and Running, You can access with this url ${OPEN_WEB_UI_HOST:-127.0.0.1}:${OPEN_WEB_UI_PORT:-8000} \n"
+        if ! docker compose ls | grep "running(2)";then
+            # Read and Checking Input Host 
+            while true;do
+                echo -n "Enter Host Address for Open Web UI (Default 127.0.0.1) : "
+                read compose_service_host
+                if ip addr | grep "$compose_service_host" &> /dev/null || [[ $compose_service_host == "0.0.0.0" ]];then
+                    export OPEN_WEB_UI_HOST=$compose_service_host
+                    break
+                elif [[ -z "$compose_service_host" ]];then
+                    export OPEN_WEB_UI_HOST=127.0.0.1
+                    break
+                fi
+                print_text red "Invalid Host, Please Check and Input Again! \n"
+            done
+            # Read and Checking Port Input
+            while true;do
+                echo -n "Enter Port for Open Web UI (Default 8000) : "
+                read compose_service_port
+                export OPEN_WEB_UI_PORT=$compose_service_port
+                if [[ -z "$compose_service_port" ]];then
+                    export OPEN_WEB_UI_PORT=8000
+                fi
+                if docker compose up -d &> /dev/null;then
+                    break
+                fi
+                print_text red "Invalid Port, The problem could be from using a prohibited port or a port already in use. Please change your port \n"
+            done
+
+            clear_screen
+            print_text green "Ollama and Open Web UI Successfully Deploy and Running, You can access with this url ${OPEN_WEB_UI_HOST:-127.0.0.1}:${OPEN_WEB_UI_PORT:-8000} \n"
+        else
+            clear_screen
+            print_text green "Ollama and Open Web UI Already Running, You can access with this url $(docker inspect ollama-open-web-ui | jq -r '.[0].HostConfig.PortBindings["8080/tcp"][0].HostIp'):$(docker inspect ollama-open-web-ui | jq -r '.[0].HostConfig.PortBindings["8080/tcp"][0].HostPort') \n"
+        fi
     else
         clear_screen
         print_text red "Error Stating Docker Compose Service. File docker-compose.yml Not Found! \n"
@@ -108,14 +146,80 @@ stopping_docker_compose_service() {
         read volume_reset
         if [[ "$volume_reset" == "Y" || "$volume_reset" == "y" ]];then
             echo "Remove Docker Compose and Remove Volume Binding"
-            docker compose down -v
+            docker compose down -v &> /dev/null
         else
             echo "Remove Docker Compose without Remove Volume Binding"
-            docker compose down
+            docker compose down &> /dev/null
         fi
         # Alerting For Success Delete Docker Compose Service
         clear_screen
         print_text green "Docker Image Service Successfully Stopping and Remove! (Volumes Delete : $volume_reset) \n"
+    else
+        clear_screen
+        print_text red "File docker-compose.yml Not Found! \n"
+    fi
+}
+
+# Custom Port Docker Compose Service 
+custom_network_docker_compose_service() {
+    if [[ -f "docker-compose.yml" ]];then
+        # Get Input Host and Port
+        echo -n "Enter the Host address for the Open Web UI Service (Default value 127.0.0.1) : "
+        read docker_service_host
+        echo -n "Enter the port for Open Web UI Service (Default value 8000) : "
+        read docker_service_port
+        # Default Value Host and Port if null
+        # Default Value Host when input value null
+        if [[ -z "$docker_service_host" ]];then
+            docker_service_host="127.0.0.1"
+        fi
+        # Default Value Port when input value null
+        if [[ -z "$docker_service_port" ]];then
+            docker_service_port="8000"
+        fi
+
+        # Set Export Value
+        export OPEN_WEB_UI_HOST=$docker_service_host
+        export OPEN_WEB_UI_PORT=$docker_service_port
+
+        # Restart Docker Compose Service
+        docker compose down &> /dev/null
+        docker compose up -d &> /dev/null
+
+        # Checking Docker Service Host and Port
+        if [[ $? -eq 0 ]];then
+            clear_screen
+            print_text green "Successfully change the Host and Port of Open Web UI Docker Service, Open Web UI can be accessed on ${OPEN_WEB_UI_HOST}:${OPEN_WEB_UI_PORT} \n"
+        else
+            host_error_flag=0
+            
+            # Check First HOST is Valid
+            if ! ip addr | grep $OPEN_WEB_UI_HOST &> /dev/null && [[ $OPEN_WEB_UI_HOST != "0.0.0.0" ]];then
+                host_error_flag=1
+                export OPEN_WEB_UI_HOST=127.0.0.1
+            fi
+
+            # Running With Available Port
+            docker compose up -d &> /dev/null
+            if [[ $? -ne 0 ]];then
+                temp_port=8000
+                while true;do
+                    export OPEN_WEB_UI_PORT=$temp_port
+                    docker compose up -d &> /dev/null
+                    if [[ $? -eq 0  ]];then
+                        break
+                    fi
+                    ((temp_port++))
+                done
+            fi
+
+            # Gretting 
+            clear_screen
+            if [[ $host_error_flag -eq 1 ]];then
+                print_text red "Invalid Host Configuration for Docker Compose. Host configured to default 127.0.0.1 \n"
+            fi
+            print_text green "Failed to change the port, but Open Web UI continues to run in the default configuration ${OPEN_WEB_UI_HOST:-127.0.0.1}:${OPEN_WEB_UI_PORT:-8000} \n"
+        fi
     else
         clear_screen
         print_text red "File docker-compose.yml Not Found! \n"
