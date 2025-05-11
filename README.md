@@ -7,6 +7,7 @@
 
 - Docker
 - docker compose / docker-compose Command
+- Bash Shell
 
 ## Features
 
@@ -38,12 +39,6 @@ docker compose pull
 
 ```bash
 docker compose up -d
-```
-
-<p>3. Pull Docker Image Services</p>
-
-```bash
-docker compose pull
 ```
 
 ### Stopping Ollama and Open Web UI Services
@@ -92,7 +87,35 @@ docker exec -it ollama-ai ollama list
 
 ## Automation Installation and Deployment Using Bash Script (Only for Unix Systems)
 
-<p>Coming Soon 😔</p>
+<p>In addition to manually configuring and deploying with the list of commands above. We have provided the <b>`deploy.sh`</b> script to make it easier for users / developers / system administrators to deploy and run this Project, namely AI Problem with Docker + Ollama + Open Web UI. The following is a guide to using the Deployment Automation Script:</p>
+
+<p>Memberikan akses execute untuk shell script : </p>
+
+```bash
+chmod a+x deploy.sh
+```
+
+<p>Running the deploy.sh script with bash : </p>
+
+```bash
+bash deploy.sh
+```
+
+<p>After you run the script through the terminal and executed through the Bash Shell, it will open a menu option that you can choose to facilitate the deployment process. Here is the output of the Automation Script `deploy.sh`:</p>
+
+<img src="assets/script-ui.png" alt="Logo Project">
+
+<p>If the display above is the same as yours, you can just use the feature according to your desired needs such as Downloading Images, Running Docker Compose, Downloading Ollama Models, etc.</p>
+
+<p><b>Additional Information : </b> There are several signs whether the feature you are running on your machine is working properly or not by looking at the Feedback at the top of your terminal.</p>
+
+<p>If the feature you run is running properly you will get the information results with green writing, Example : </p>
+
+<img src="assets/success-feedback.png" alt="Logo Project">
+
+<p>If the feature does not run properly or has an error / crash / does not support your machine. The script will provide a notification with red writing and understand what steps are recommended so that you can run it properly, Example :</p>
+
+<img src="assets/error-feedback.png" alt="Logo Project">
 
 ## Access Application
 
